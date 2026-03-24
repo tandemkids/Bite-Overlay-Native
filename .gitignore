@@ -1,0 +1,53 @@
+# OSX
+  .DS_Store
+
+  # Xcode
+  build/
+  *.pbxuser
+  !default.pbxuser
+  *.mode1v2
+  !default.mode1v2
+  *.mode2v2
+  !default.mode2v2
+  *.perspectivev3
+  !default.perspectivev3
+  xcuserdata
+  *.xccheckout
+  *.moved-to-trash
+  DerivedData
+  *.hmap
+  *.ipa
+  *.xcuserstate
+  ios/.xcode.env.local
+
+  # Android/IntelliJ
+  build/
+  .idea
+  .gradle
+  local.properties
+  *.iml
+  *.hprof
+  .cxx
+  *.keystore
+  !debug.keystore
+
+  # node.js
+  node_modules/
+  npm-debug.log
+  yarn-error.log
+
+  # React Native Build Artifacts
+  android/app/build/
+  android/.gradle/
+  android/build/
+  android/app/.cxx/
+  *.apk
+  *.aab
+
+  # Bundle artifact
+  *.jsbundle
+
+  # Ruby / CocoaPods
+  **/Pods/
+  /vendor/bundle/
+  
