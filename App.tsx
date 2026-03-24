@@ -1,5 +1,5 @@
-import React, {useRef, useState} from 'react';
-import {StyleSheet, Text, View} from 'react-native';
+import React, {useEffect, useRef, useState} from 'react';
+import {NativeModules, StyleSheet, Text, View} from 'react-native';
 import {
   Camera,
   useCameraDevice,
@@ -9,11 +9,19 @@ import {
 import {detectFaces, FaceContourType} from 'vision-camera-face-detector';
 import {Worklets} from 'react-native-worklets-core';
 
+// JS↔Native bridge: NativeModules.OverlayModule ↔ OverlayModule.java
+// Methods: startOverlay(), setOpacity(number), stopOverlay()
+const {OverlayModule} = NativeModules;
+
 // Minimum vertical gap between upper and lower lip (frame pixels) = mouth open
 const OPEN_THRESHOLD = 15;
 
 // How long the mouth must stay closed before triggering the screen-darken log
 const CLOSED_DURATION_MS = 5_000;
+
+// Overlay opacity levels sent to OverlayService via OverlayModule
+const OPACITY_CLEAR = 0.0; // mouth closed / idle
+const OPACITY_DARK = 0.8; // mouth open / biting
 
 export default function App(): React.JSX.Element {
   const device = useCameraDevice('front');
@@ -21,8 +29,21 @@ export default function App(): React.JSX.Element {
 
   // Timestamp of when the mouth first closed; null while mouth is open
   const closedSinceRef = useRef<number | null>(null);
-  // Guard so the log fires at most once per closed session
+  // Guard so the threshold log fires at most once per closed session
   const logFiredRef = useRef(false);
+
+  // Start the WindowManager overlay when the component mounts
+  useEffect(() => {
+    OverlayModule?.startOverlay();
+    return () => {
+      OverlayModule?.stopOverlay();
+    };
+  }, []);
+
+  // Drive overlay opacity from isBiting state via the native bridge
+  useEffect(() => {
+    OverlayModule?.setOpacity(isBiting ? OPACITY_DARK : OPACITY_CLEAR);
+  }, [isBiting]);
 
   // Called on the JS thread whenever a new mouth-open measurement arrives
   const onMouthUpdate = Worklets.createRunOnJS((isOpen: boolean) => {
